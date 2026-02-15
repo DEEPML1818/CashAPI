@@ -1,1 +1,1 @@
-# BCH-402-The-Agentic-Micropayment-Standard
+# CashAPI
