@@ -10,6 +10,7 @@ Gated your AI models and APIs with instant 0-conf BCH payments.
 - **Dynamic Pricing**: Support for reputation-based pricing and discounts.
 - **Built-in Discovery**: Automatically serves `/.well-known/402.json` manifest.
 - **Replay Protection**: Prevents double-submission of TXIDs.
+- **Protocol Documentation**: Full technical specs at [cashapi-web.vercel.app/middleware](https://cashapi-web.vercel.app/middleware).
 
 ## Installation
 
@@ -28,7 +29,7 @@ const app = express();
 // Protect your AI route
 app.post('/api/ai-chat', cashapiMiddleware({
   address: 'bitcoincash:qpm2qavt7wjq73p8u0tmsv55p57m9au48pgshqv6a2',
-  priceSats: 1000,
+  priceSats: 1200,
   network: 'mainnet', // Use 'chipnet' for testing
   discovery: {
     enabled: true,

@@ -8,6 +8,7 @@ Automatically handles payment challenges and broadcasts 0-conf transactions to u
 - **Auto-Payment**: Integrated wallet handles BCH broadcasts automatically when a `402` is received.
 - **Challenge Parsing**: Correctly parses `WWW-Authenticate: x402` headers.
 - **Session Support**: Remembers payment tokens for persistent access.
+- **Protocol Documentation**: Full technical specs at [cashapi-web.vercel.app/middleware](https://cashapi-web.vercel.app/middleware).
 
 ## Installation
 

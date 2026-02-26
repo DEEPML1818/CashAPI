@@ -9,6 +9,7 @@ setup(
         "requests>=2.25.1",
     ],
     author="CashApi Team",
+    url="https://cashapi-web.vercel.app/middleware",
     description="Python SDK for CashApi (BCH 402)",
     classifiers=[
         "Programming Language :: Python :: 3.8",

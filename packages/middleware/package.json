@@ -2,6 +2,7 @@
   "name": "cashapi-middleware",
   "version": "1.1.0",
   "description": "Bitcoin Cash 402 Payment Required Middleware",
+  "homepage": "https://cashapi-web.vercel.app/middleware",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
