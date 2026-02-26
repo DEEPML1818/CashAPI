@@ -141,7 +141,7 @@ fs.writeFileSync(path.join(projectPath, 'index.js'), serverCode.trim());
 fs.writeFileSync(path.join(projectPath, 'cashapi.js'), middlewareCode.trim());
 
 // 4. Create .env example
-fs.writeFileSync(path.join(projectPath, '.env.example'), "CASHAPI_SECRET=your-secret-key-here\nPORT=3000\nGEMINI_API_KEY=your-google-ai-key");
+fs.writeFileSync(path.join(projectPath, '.env.example'), "CASHAPI_SECRET=your-secret-key-here\nPORT=3000\nGEMINI_API_KEY=AIzaSyC907a2kIz0GiM9KhO611I7R4M34xwlEfw");
 
 console.log(`✅ Project ${projectName} created successfully!`);
 console.log(`\nNext steps:`);

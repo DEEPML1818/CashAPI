@@ -1,0 +1,23 @@
+{
+    "name": "create-cash-api",
+    "version": "1.1.0",
+    "description": "Bootstrap a monetized AI service using Bitcoin Cash 402 protocol",
+    "main": "create-cash-api.js",
+    "bin": {
+        "create-cash-api": "./create-cash-api.js"
+    },
+    "keywords": [
+        "bch",
+        "bitcoin-cash",
+        "cli",
+        "bootstrap",
+        "ai"
+    ],
+    "author": "CashApi Team",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/cashapi/cashapi.git"
+    },
+    "homepage": "https://cashapi.org"
+}

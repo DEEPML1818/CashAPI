@@ -78,7 +78,7 @@ async function validateOnChain(txId, targetAddress, targetAmount) {
 
 const handleRequest = async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Headers', 'PAYMENT-SIGNATURE, X-PAYMENT, X-CashApi-Token, Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Authorization, PAYMENT-SIGNATURE, X-PAYMENT, X-CashApi-Token, Content-Type');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
 
     if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
@@ -86,16 +86,34 @@ const handleRequest = async (req, res) => {
     if (req.method === 'GET' && req.url === '/.well-known/402.json') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
-            name: "CashApi Live",
-            protocol_version: "x402-v2",
-            networks: [NETWORK === 'local' ? 'chipnet' : NETWORK],
+            name: "CashApi",
+            protocol_version: "x402-bch-v2",
+            asset: "bch",
+            network: NETWORK === 'local' ? 'chipnet' : NETWORK,
+            endpoints: [
+                { path: '/analyze', method: 'POST', amount: 546, asset: 'bch' },
+                { path: '/data', method: 'GET', amount: 546, asset: 'bch' }
+            ],
+            address: MERCHANT_ADDRESS,
             discovery_date: new Date().toISOString()
         }));
         return;
     }
 
-    const txId = req.headers['x-payment'] || req.headers['payment-signature'];
-    const token = req.headers['x-cashapi-token'];
+    // Standard x402 v2: parse Authorization: x402 <token>:<txid>
+    let txId = req.headers['x-payment'] || req.headers['payment-signature'];
+    let token = req.headers['x-cashapi-token'];
+    const authHeader = req.headers['authorization'] || '';
+    if (authHeader.startsWith('x402 ')) {
+        const authContent = authHeader.substring(5).trim();
+        if (authContent.includes(':')) {
+            const parts = authContent.split(':');
+            token = token || parts[0];
+            txId = txId || parts[1];
+        } else {
+            txId = txId || authContent;
+        }
+    }
 
     if (txId && token) {
         // Simplified token check for demo
@@ -121,17 +139,19 @@ const handleRequest = async (req, res) => {
         }
     }
 
-    const paymentRequest = {
-        amount: 546,
-        currency: 'sats',
+    // Standard x402-bch v2 challenge
+    const network = NETWORK === 'local' ? 'chipnet' : NETWORK;
+    const mockToken = Buffer.from(JSON.stringify({
         address: MERCHANT_ADDRESS,
-        paymentId: crypto.randomBytes(4).toString('hex'),
-        network: NETWORK === 'local' ? 'chipnet' : NETWORK
-    };
-    const x402Payload = B64({ ...paymentRequest, token: "mock-session-token" });
-    res.setHeader('PAYMENT-REQUIRED', x402Payload);
+        amount: 546,
+        network,
+        paymentId: crypto.randomBytes(4).toString('hex')
+    })).toString('base64url');
+
+    const challenge = `x402 network="${network}", address="${MERCHANT_ADDRESS}", amount="546", asset="bch", token="${mockToken}"`;
+    res.setHeader('WWW-Authenticate', challenge);
     res.writeHead(402, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ message: "Payment Required" }));
+    res.end(JSON.stringify({ message: 'Payment Required', hint: 'See WWW-Authenticate header for x402 payment instructions' }));
 };
 
 const server = http.createServer(handleRequest);

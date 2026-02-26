@@ -1,9 +1,10 @@
-import type { CashApiOptions } from './types.ts';
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.generateManifest = void 0;
 /**
  * Generates the .well-known/402.json manifest
  */
-export const generateManifest = (options: CashApiOptions) => {
+const generateManifest = (options) => {
     return {
         name: options.discovery?.name || "CashApi Service",
         protocol_version: "x402-v2",
@@ -27,3 +28,4 @@ export const generateManifest = (options: CashApiOptions) => {
         discovery_date: new Date().toISOString()
     };
 };
+exports.generateManifest = generateManifest;

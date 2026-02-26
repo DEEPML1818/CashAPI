@@ -1,0 +1,24 @@
+{
+    "name": "cashapi-monorepo",
+    "private": true,
+    "description": "Bitcoin Cash 402 AI Payment Protocol",
+    "workspaces": [
+        "packages/*"
+    ],
+    "scripts": {
+        "build": "npm run build --workspaces",
+        "test": "npm test --workspaces"
+    },
+    "keywords": [
+        "bch",
+        "bitcoin-cash",
+        "x402",
+        "ai",
+        "agents"
+    ],
+    "author": "CashApi Team",
+    "license": "MIT",
+    "dependencies": {
+        "@google/generative-ai": "^0.24.1"
+    }
+}

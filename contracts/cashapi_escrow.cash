@@ -1,24 +1,38 @@
-// CashApi Smart Escrow v1
-// This contract ensures the AI agent service only gets paid if they provide the data,
-// or allows the user to reclaim funds after a timeout.
+// CashApi Smart Escrow v3 (Agent Longevity & Reputation Edition)
+// This contract enforces that revenue is split between the Agent and their 'Life Support' (Gas Tank).
 
 pragma cashscript ^0.12.0;
 
 contract CashApiEscrow(
     pubkey agentPkey,
+    pubkey gasTankPkey, // NEW: Address for the agent's autonomous 'gas tank'
     pubkey userPkey,
-    bytes32 dataHash, // Hash of the expected AI result
-    int timeout       // Block height or timestamp for refund
+    bytes32 dataHash,
+    int timeout,
+    int payoutAmount,   // Amount for the agent
+    int gasTankAmount   // Amount for the gas tank (Life Support)
 ) {
-    // 1. Agent releases funds by providing proof of work (pre-image of dataHash)
     function complete(sig agentSig, bytes dataPreimage) {
+        // 1. Security Checks
         require(checkSig(agentSig, agentPkey));
         require(sha256(dataPreimage) == dataHash);
+
+        // 2. COVENANT: Dual Output Enforcement
+        // Output 0: Direct payment to Agent
+        bytes agentLockingScript = new LockingBytecodeP2PKH(hash160(agentPkey));
+        require(tx.outputs[0].value == payoutAmount);
+        require(tx.outputs[0].lockingBytecode == agentLockingScript);
+
+        // Output 1: Payment to Gas Tank (Life Support)
+        bytes gasTankLockingScript = new LockingBytecodeP2PKH(hash160(gasTankPkey));
+        require(tx.outputs[1].value == gasTankAmount);
+        require(tx.outputs[1].lockingBytecode == gasTankLockingScript);
+        
+        // Fee is implicit dust
     }
 
-    // 2. User reclaims funds if the AI agent doesn't deliver within the timeout
     function refund(sig userSig) {
         require(checkSig(userSig, userPkey));
-        require(tx.time >= timeout); // Use tx.time instead of tx.age
+        require(tx.time >= timeout);
     }
 }

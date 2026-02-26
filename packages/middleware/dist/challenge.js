@@ -1,19 +1,19 @@
-import express from 'express';
-import type { Response } from 'express';
-import crypto from 'crypto';
-import jwt from 'jsonwebtoken';
-import type { CashApiOptions, CashApiPaymentRequest } from './types.ts';
-
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.send402Challenge = void 0;
+const crypto_1 = __importDefault(require("crypto"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const SECRET_KEY = process.env.CASHAPI_SECRET || 'cashapi-default-secret';
-
 /**
  * Generates and sends a 402 challenge response with specification-compliant x402 headers.
  */
-export const send402Challenge = (res: Response, options: CashApiOptions) => {
-    const nonce = crypto.randomBytes(16).toString('hex');
+const send402Challenge = (res, options) => {
+    const nonce = crypto_1.default.randomBytes(16).toString('hex');
     const paymentId = Math.random().toString(36).substring(7);
-
-    const paymentRequest: CashApiPaymentRequest = {
+    const paymentRequest = {
         amount: options.priceSats,
         currency: 'sats',
         address: options.address,
@@ -21,15 +21,11 @@ export const send402Challenge = (res: Response, options: CashApiOptions) => {
         network: options.network || 'mainnet',
         nonce: nonce
     };
-
-    const paymentToken = jwt.sign(paymentRequest, SECRET_KEY, { expiresIn: '1h' });
-
+    const paymentToken = jsonwebtoken_1.default.sign(paymentRequest, SECRET_KEY, { expiresIn: '1h' });
     // Standard x402 (v2) challenge header
     // Format: WWW-Authenticate: x402 network="<network>", address="<address>", amount="<amount>", asset="bch"
     const challenge = `x402 network="${paymentRequest.network}", address="${paymentRequest.address}", amount="${paymentRequest.amount}", asset="bch", token="${paymentToken}"`;
-
     res.setHeader('WWW-Authenticate', challenge);
-
     // --- Pro Differentiation: Trust Layer Headers ---
     if (options.escrow) {
         if (options.escrow.contractAddress) {
@@ -42,7 +38,6 @@ export const send402Challenge = (res: Response, options: CashApiOptions) => {
             res.setHeader('X-CashApi-DataHash', options.escrow.dataHash);
         }
     }
-
     res.status(402).json({
         message: 'Payment Required',
         header_reference: 'Check WWW-Authenticate and X-CashApi-* headers for instructions',
@@ -50,3 +45,4 @@ export const send402Challenge = (res: Response, options: CashApiOptions) => {
         escrow: options.escrow || undefined
     });
 };
+exports.send402Challenge = send402Challenge;

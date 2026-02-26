@@ -1,0 +1,103 @@
+{
+  "contractName": "CashApiEscrow",
+  "constructorInputs": [
+    {
+      "name": "agentPkey",
+      "type": "pubkey"
+    },
+    {
+      "name": "gasTankPkey",
+      "type": "pubkey"
+    },
+    {
+      "name": "userPkey",
+      "type": "pubkey"
+    },
+    {
+      "name": "dataHash",
+      "type": "bytes32"
+    },
+    {
+      "name": "timeout",
+      "type": "int"
+    },
+    {
+      "name": "payoutAmount",
+      "type": "int"
+    },
+    {
+      "name": "gasTankAmount",
+      "type": "int"
+    }
+  ],
+  "abi": [
+    {
+      "name": "complete",
+      "inputs": [
+        {
+          "name": "agentSig",
+          "type": "sig"
+        },
+        {
+          "name": "dataPreimage",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "refund",
+      "inputs": [
+        {
+          "name": "userSig",
+          "type": "sig"
+        }
+      ]
+    }
+  ],
+  "bytecode": "OP_7 OP_PICK OP_0 OP_NUMEQUAL OP_IF OP_8 OP_ROLL OP_OVER OP_CHECKSIGVERIFY OP_8 OP_ROLL OP_SHA256 OP_4 OP_ROLL OP_EQUALVERIFY 76a914 OP_SWAP OP_HASH160 OP_CAT 88ac OP_CAT OP_0 OP_OUTPUTVALUE OP_5 OP_ROLL OP_NUMEQUALVERIFY OP_0 OP_OUTPUTBYTECODE OP_EQUALVERIFY 76a914 OP_SWAP OP_HASH160 OP_CAT 88ac OP_CAT OP_1 OP_OUTPUTVALUE OP_4 OP_ROLL OP_NUMEQUALVERIFY OP_1 OP_OUTPUTBYTECODE OP_EQUAL OP_NIP OP_NIP OP_NIP OP_ELSE OP_7 OP_ROLL OP_1 OP_NUMEQUALVERIFY OP_7 OP_ROLL OP_3 OP_ROLL OP_CHECKSIGVERIFY OP_3 OP_ROLL OP_CHECKLOCKTIMEVERIFY OP_2DROP OP_2DROP OP_2DROP OP_1 OP_ENDIF",
+  "source": "// CashApi Smart Escrow v3 (Agent Longevity & Reputation Edition)\r\n// This contract enforces that revenue is split between the Agent and their 'Life Support' (Gas Tank).\r\n\r\npragma cashscript ^0.12.0;\r\n\r\ncontract CashApiEscrow(\r\n    pubkey agentPkey,\r\n    pubkey gasTankPkey, // NEW: Address for the agent's autonomous 'gas tank'\r\n    pubkey userPkey,\r\n    bytes32 dataHash,\r\n    int timeout,\r\n    int payoutAmount,   // Amount for the agent\r\n    int gasTankAmount   // Amount for the gas tank (Life Support)\r\n) {\r\n    function complete(sig agentSig, bytes dataPreimage) {\r\n        // 1. Security Checks\r\n        require(checkSig(agentSig, agentPkey));\r\n        require(sha256(dataPreimage) == dataHash);\r\n\r\n        // 2. COVENANT: Dual Output Enforcement\r\n        // Output 0: Direct payment to Agent\r\n        bytes agentLockingScript = new LockingBytecodeP2PKH(hash160(agentPkey));\r\n        require(tx.outputs[0].value == payoutAmount);\r\n        require(tx.outputs[0].lockingBytecode == agentLockingScript);\r\n\r\n        // Output 1: Payment to Gas Tank (Life Support)\r\n        bytes gasTankLockingScript = new LockingBytecodeP2PKH(hash160(gasTankPkey));\r\n        require(tx.outputs[1].value == gasTankAmount);\r\n        require(tx.outputs[1].lockingBytecode == gasTankLockingScript);\r\n        \r\n        // Fee is implicit dust\r\n    }\r\n\r\n    function refund(sig userSig) {\r\n        require(checkSig(userSig, userPkey));\r\n        require(tx.time >= timeout);\r\n    }\r\n}\r\n",
+  "debug": {
+    "bytecode": "5779009c63587a78ad587aa8547a880376a9147ca97e0288ac7e00cc557a9d00cd880376a9147ca97e0288ac7e51cc547a9d51cd8777777767577a519d577a537aad537ab16d6d6d5168",
+    "sourceMap": "15:4:32:5;;;;;17:25:17:33;;:35::44;:8::47:1;18:23:18:35:0;;:16::36:1;:40::48:0;;:8::50:1;22:35:22:79:0;:68::77;:60::78:1;:35::79;;;23:27:23:28:0;:16::35:1;:39::51:0;;:8::53:1;24:27:24:28:0;:16::45:1;:8::69;27:37:27:83:0;:70::81;:62::82:1;:37::83;;;28:27:28:28:0;:16::35:1;:39::52:0;;:8::54:1;29:27:29:28:0;:16::45:1;:8::71;15:4:32:5;;;;34::37::0;;;;35:25:35:32;;:34::42;;:8::45:1;36:27:36:34:0;;:8::36:1;34:4:37:5;;;;6:0:38:1",
+    "logs": [],
+    "requires": [
+      {
+        "ip": 15,
+        "line": 17
+      },
+      {
+        "ip": 21,
+        "line": 18
+      },
+      {
+        "ip": 32,
+        "line": 23
+      },
+      {
+        "ip": 35,
+        "line": 24
+      },
+      {
+        "ip": 46,
+        "line": 28
+      },
+      {
+        "ip": 50,
+        "line": 29
+      },
+      {
+        "ip": 62,
+        "line": 35
+      },
+      {
+        "ip": 65,
+        "line": 36
+      }
+    ]
+  },
+  "compiler": {
+    "name": "cashc",
+    "version": "0.12.1"
+  },
+  "updatedAt": "2026-02-24T13:06:59.704Z"
+}
